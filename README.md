@@ -4,3 +4,4 @@
 ## The files
 * demo.mp4: The video of demo
 * demo.jpeg: The photo of connecting wires
+* Midterm presentation.pptx: Midterm presentation powerpoint
