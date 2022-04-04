@@ -9,34 +9,32 @@
 void my_delay_ms(uint32_t timeDelayed);
 float getDistance();
 unsigned wait_sensor();
+void timer0_isr();
+
+unsigned int8 cnt;
+unsigned int16 i;
+#INT_TIMER0
+void timer0_isr(){
+  cnt++;
+  clear_interrupt(INT_TIMER0);
+}
 
 float getDistance()
 {
-    struct timeval tv1;
-    struct timeval tv2;
-    long start, end;
-    float distance;
-    output_low(TrigPin);
-    my_delay_ms(2);
-    output_high(TrigPin);
-    my_delay_ms(10);
-    output_low(TrigPin);
-    while( !(digitalRead(Echo) == HIGH));
-    gettimeofday(&tv1, NULL);
-    while( !(digitalRead(Echo) == LOW));
-    gettimeofday(&tv2, NULL);
-    start = tv1.tv_sec * 1000000 + tv1.tv_usec;
-    end  = tv2.tv_sec * 1000000 + tv2.tv_usec;
-    distance = (float)(stop - end) / 1000000 * 34000 / 2;
-    return distance;
+    i = 0;
+    set_timer0(0);
+    cnt = 0;
+    while(input(EchoPin) && (i < 25000))
+        i = cnt * 256 + get_timer0();
+    return i;
 }
 
 unsigned wait_sensor(){
   i = 0;
   set_timer0(0);
-  count = 0;
+  cnt = 0;
   while(!input(EchoPin) && (i < 1000))
-    i = count * 256 + get_timer0();
+    i = cnt * 256 + get_timer0();
   if(i > 990)
     return 0;
   else
@@ -59,6 +57,7 @@ void my_delay_ms(uint32_t timeDelayed)
 int main(void)
 {
     float distance;
+    setup_timer_0 (T0_INTERNAL | T0_DIV_2);
     DDRD |= _BV(DDD4);
     DDRD |= _BV(DDD5);
     DDRD |= _BV(DDD6);
